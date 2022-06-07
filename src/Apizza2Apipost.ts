@@ -33,22 +33,22 @@ class Apizza2Apipost {
     this.project.description = json?.project_info?.comment || '';
   }
   createNewApi(item: any) {
-    const { api: foxApi } = item;
+    const { api: apizzaApi } = item;
     var api: any = {
       name: item.name || '新建接口',
       target_type: 'api',
-      url: foxApi.path || "",
-      method: foxApi.method.toUpperCase() || 'GET',
+      url: apizzaApi.path || "",
+      method: apizzaApi.method.toUpperCase() || 'GET',
       request: {
         'query': [],
         'header': [],
-        'description': foxApi.description || '',
+        'description': apizzaApi.description || '',
       }
     }
     const { request } = api;
-    if (foxApi.hasOwnProperty('parameters')) {
-      for (const key in foxApi.parameters) {
-        let item = foxApi.parameters[key];
+    if (apizzaApi.hasOwnProperty('parameters')) {
+      for (const key in apizzaApi.parameters) {
+        let item = apizzaApi.parameters[key];
         if (key == 'query') {
           item.name && request.query.push({
             is_checked: "1",
@@ -72,7 +72,7 @@ class Apizza2Apipost {
         }
       }
     }
-    if (foxApi.hasOwnProperty('auth')) {
+    if (apizzaApi.hasOwnProperty('auth')) {
       // 全证
       let apiPostAuth = {
         type: 'noauth',
@@ -88,7 +88,7 @@ class Apizza2Apipost {
           password: ''
         }
       }
-      const { auth } = foxApi;
+      const { auth } = apizzaApi;
       if (auth) {
         let type = auth['type'] || 'noauth';
         let apikey = auth['apikey'];
@@ -129,17 +129,17 @@ class Apizza2Apipost {
         request['auth'] = apiPostAuth;
       }
     }
-    if (foxApi.hasOwnProperty('requestBody')) {
+    if (apizzaApi.hasOwnProperty('requestBody')) {
       request.body = {
         "mode": "none",
         "parameter": [],
         "raw": '',
         "raw_para": []
       }
-      if (foxApi.requestBody['type'] == 'application/x-www-form-urlencoded') {
+      if (apizzaApi.requestBody['type'] == 'application/x-www-form-urlencoded') {
         request.body.mode = 'urlencoded';
-        if (foxApi.requestBody.hasOwnProperty('parameters') && foxApi.requestBody.parameters instanceof Array) {
-          foxApi.requestBody.parameters.forEach((param: any) => {
+        if (apizzaApi.requestBody.hasOwnProperty('parameters') && apizzaApi.requestBody.parameters instanceof Array) {
+          apizzaApi.requestBody.parameters.forEach((param: any) => {
             param.name && request.body.parameter.push(
               {
                 is_checked: "1",
@@ -152,10 +152,10 @@ class Apizza2Apipost {
               })
           });
         }
-      } else if (foxApi.requestBody['type'] == 'multipart/form-data') {
+      } else if (apizzaApi.requestBody['type'] == 'multipart/form-data') {
         request.body.mode = 'form-data';
-        if (foxApi.requestBody.hasOwnProperty('parameters') && foxApi.requestBody.parameters instanceof Array) {
-          foxApi.requestBody.parameters.forEach((param: any) => {
+        if (apizzaApi.requestBody.hasOwnProperty('parameters') && apizzaApi.requestBody.parameters instanceof Array) {
+          apizzaApi.requestBody.parameters.forEach((param: any) => {
             param.name && request.body.parameter.push(
               {
                 is_checked: "1",
@@ -169,7 +169,7 @@ class Apizza2Apipost {
           });
         }
       }else{
-        request.body.raw=foxApi.requestBody.sampleValue || '';
+        request.body.raw=apizzaApi.requestBody.sampleValue || '';
       }
     }
     return api;
