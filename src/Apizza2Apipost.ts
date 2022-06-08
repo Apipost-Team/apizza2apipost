@@ -33,220 +33,106 @@ class Apizza2Apipost {
     this.project.description = json?.project_info?.comment || '';
   }
   createNewApi(item: any) {
-    const { api: apizzaApi } = item;
     var api: any = {
-      name: item.name || '新建接口',
+      name: item?.name || '新建接口',
       target_type: 'api',
-      url: apizzaApi.path || "",
-      method: apizzaApi.method.toUpperCase() || 'GET',
+      url: item?.url || "",
+      method: item.method.toUpperCase() || 'GET',
       request: {
         'query': [],
         'header': [],
-        'description': apizzaApi.description || '',
+        'description': item?.description || '',
       }
     }
     const { request } = api;
-    if (apizzaApi.hasOwnProperty('parameters')) {
-      for (const key in apizzaApi.parameters) {
-        let item = apizzaApi.parameters[key];
-        if (key == 'query') {
-          item.name && request.query.push({
-            is_checked: "1",
-            type: 'Text',
-            key: item.name,
-            value: item.sampleValue || '',
-            not_null: "1",
-            description: item.description || '',
-            field_type: "Text"
-          });
-        } else if (key == 'header') {
-          item.name && request.header.push({
-            is_checked: "1",
-            type: 'Text',
-            key: item.name,
-            value: item.sampleValue || '',
-            not_null: "1",
-            description: item.description || '',
-            field_type: "Text"
-          });
-        }
+    if(item.hasOwnProperty('query_params') && item.query_params instanceof Array){
+      for (const i of item.query_params ) {
+        i.key && request.query.push({
+          is_checked:i.hasOwnProperty('checked') ? (i.checked != 1 ? '1' : '-1') : '1',
+          type: 'Text',
+          key: i.key,
+          value: i.value || '',
+          not_null: i.hasOwnProperty('require') ? (i.require != 1 ? '1' : '-1') : '1',
+          description: i.desc || '',
+          field_type: "Text"
+        });
       }
     }
-    if (apizzaApi.hasOwnProperty('auth')) {
-      // 全证
-      let apiPostAuth = {
-        type: 'noauth',
-        kv: {
-          key: '',
-          value: '',
-        },
-        bearer: {
-          key: ''
-        },
-        basic: {
-          username: '',
-          password: ''
-        }
-      }
-      const { auth } = apizzaApi;
-      if (auth) {
-        let type = auth['type'] || 'noauth';
-        let apikey = auth['apikey'];
-        let bearer = auth['bearer'];
-        let basic = auth['basic'];
-        switch (type) {
-          case 'apikey':
-            type = 'kv';
-            break;
-          case 'bearer':
-            type = 'bearer';
-            break;
-          case 'basic':
-            type = 'basic';
-            break;
-          default:
-            type = 'noauth';
-            break;
-        }
-        apiPostAuth.type = type;
-        if (apikey) {
-          apiPostAuth.kv = {
-            key: apikey['key'] || '',
-            value: apikey['value'] || ''
-          }
-        }
-        if (bearer) {
-          apiPostAuth.bearer = {
-            key: bearer['token'] || '',
-          }
-        }
-        if (basic) {
-          apiPostAuth.basic = {
-            username: basic['username'] || '',
-            password: basic['password'] || ''
-          }
-        }
-        request['auth'] = apiPostAuth;
+    if(item.hasOwnProperty('header_params') && item.header_params instanceof Array){
+      for (const i of item.header_params ) {
+        i.key && request.header.push({
+          is_checked:i.hasOwnProperty('checked') ? (i.checked != 1 ? '1' : '-1') : '1',
+          type: 'Text',
+          key: i.key,
+          value: i.value || '',
+          not_null: i.hasOwnProperty('require') ? (i.require != 1 ? '1' : '-1') : '1',
+          description: i.desc || '',
+          field_type: "Text"
+        });
       }
     }
-    if (apizzaApi.hasOwnProperty('requestBody')) {
+    if(item.hasOwnProperty('body_type')){
       request.body = {
         "mode": "none",
         "parameter": [],
         "raw": '',
         "raw_para": []
       }
-      if (apizzaApi.requestBody['type'] == 'application/x-www-form-urlencoded') {
+      if(item.body_type == 'x-www-form-urlencoded'){
         request.body.mode = 'urlencoded';
-        if (apizzaApi.requestBody.hasOwnProperty('parameters') && apizzaApi.requestBody.parameters instanceof Array) {
-          apizzaApi.requestBody.parameters.forEach((param: any) => {
-            param.name && request.body.parameter.push(
+        if(item.hasOwnProperty('body_params') && item.body_params instanceof Array){
+          item.body_params.forEach((param : any)=>{
+            param.key && request.body.parameter.push(
               {
                 is_checked: "1",
                 type: 'Text',
-                key: param.name || "",
-                value: param.sampleValue || "",
+                key: param.key || "",
+                value: param.value || "",
                 not_null: "1",
-                description: param.description || "",
+                description: param.desc || "",
                 field_type: "Text"
-              })
-          });
+              }
+            )
+          })
         }
-      } else if (apizzaApi.requestBody['type'] == 'multipart/form-data') {
+      }else if(item.body_type == 'form-data' && item.body_params instanceof Array){
         request.body.mode = 'form-data';
-        if (apizzaApi.requestBody.hasOwnProperty('parameters') && apizzaApi.requestBody.parameters instanceof Array) {
-          apizzaApi.requestBody.parameters.forEach((param: any) => {
-            param.name && request.body.parameter.push(
-              {
-                is_checked: "1",
-                type: param['type'] && param['type'] == 'file' ? 'File' : 'Text',
-                key: param.name || "",
-                value: param.sampleValue || "",
-                not_null: "1",
-                description: param.description || "",
-                field_type: "Text"
-              })
-          });
-        }
-      }else{
-        request.body.raw=apizzaApi.requestBody.sampleValue || '';
+        item.body_params.forEach((param : any)=>{
+          param.key && request.body.parameter.push(
+            {
+              is_checked: "1",
+              type:param.hasOwnProperty('rtype') && param.rtype == 'File' ? 'File' : 'Text',
+              key: param.key || "",
+              value: param.value || "",
+              not_null: "1",
+              description: param.desc || "",
+              field_type: "Text"
+            }
+          )
+        })
+      }else if(item.body_type == 'raw' && item.hasOwnProperty('body_raw')){
+        request.body.raw=item.body_raw || '';
       }
     }
     return api;
   }
   createNewFolder(item: any) {
     var newFolder: any = {
-      'name': item.name || '新建目录',
+      'name': item?.name || '新建目录',
       'target_type': 'folder',
-      'description': item.description || '',
+      'description': item?.comment || '',
       'children': [],
     };
-    // 全证
-    let apiPostAuth = {
-      type: 'noauth',
-      kv: {
-        key: '',
-        value: '',
-      },
-      bearer: {
-        key: ''
-      },
-      basic: {
-        username: '',
-        password: ''
-      }
-    }
-    const { auth } = item;
-    if (auth) {
-      let type = auth['type'] || 'noauth';
-      let apikey = auth['apikey'];
-      let bearer = auth['bearer'];
-      let basic = auth['basic'];
-      switch (type) {
-        case 'apikey':
-          type = 'kv';
-          break;
-        case 'bearer':
-          type = 'bearer';
-          break;
-        case 'basic':
-          type = 'basic';
-          break;
-        default:
-          type = 'noauth';
-          break;
-      }
-      apiPostAuth.type = type;
-      if (apikey) {
-        apiPostAuth.kv = {
-          key: apikey['key'] || '',
-          value: apikey['value'] || ''
-        }
-      }
-      if (bearer) {
-        apiPostAuth.bearer = {
-          key: bearer['token'] || '',
-        }
-      }
-      if (basic) {
-        apiPostAuth.basic = {
-          username: basic['username'] || '',
-          password: basic['password'] || ''
-        }
-      }
-      newFolder['auth'] = apiPostAuth;
-    }
     return newFolder;
   }
   handleApiAndFolder(items: any[], parent: any = null) {
     var root = this;
     for (const item of items) {
       let target;
-      if (item.hasOwnProperty('items') && !item.hasOwnProperty('api')) {
+      if (item.hasOwnProperty('api_list') && !item.hasOwnProperty('url')) {
         target = root.createNewFolder(item);
-        root.handleApiAndFolder(item.items, target);
-      }
-      if (item.hasOwnProperty('api')) {
+        root.handleApiAndFolder(item.api_list, target);
+      }else{
         target = root.createNewApi(item);
       }
       if (parent && parent != null) {
@@ -262,9 +148,7 @@ class Apizza2Apipost {
     }
     let categorys = json.categorys;
     if (categorys instanceof Array && categorys.length > 0) {
-      if (categorys[0].hasOwnProperty('items')) {
-        this.handleApiAndFolder(categorys[0].items, null);
-      }
+      this.handleApiAndFolder(categorys, null);
     }
   }
   convert(json: object) {
