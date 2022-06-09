@@ -111,6 +111,7 @@ class Apizza2Apipost {
           )
         })
       }else if(item.body_type == 'raw' && item.hasOwnProperty('body_raw')){
+        request.body.mode = 'json';
         request.body.raw=item.body_raw || '';
       }
     }
