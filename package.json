@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "files": [
     "libs",
-    "icons"
+    "icons",
+    "dist"
   ],
   "scripts": {
     "test": "jest",
@@ -65,5 +66,9 @@
   },
   "author": "xbw",
   "license": "MIT",
-  "keywords": ["apizza", "apipost", "apizza2apipost"]
+  "keywords": [
+    "apizza",
+    "apipost",
+    "apizza2apipost"
+  ]
 }

@@ -3,10 +3,10 @@ import commonjs from 'rollup-plugin-commonjs'
 import dts from "rollup-plugin-dts";
 
 export default [{
-  name: 'apipostSampleModule',
+  name: 'apizza2apipost',
   input: 'src/index.ts',
   output: {
-    name: 'apipostSampleModule',
+    name: 'apizza2apipost',
     file: 'dist/index.js',
     format: 'cjs'
   },
