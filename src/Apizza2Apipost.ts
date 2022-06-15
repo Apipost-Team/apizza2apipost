@@ -136,6 +136,9 @@ class Apizza2Apipost {
       }else{
         target = root.createNewApi(item);
       }
+      if(item.hasOwnProperty('sub_categorys') && !item.hasOwnProperty('url')){
+        root.handleApiAndFolder(item.sub_categorys, target);
+      }
       if (parent && parent != null) {
         parent.children.push(target);
       } else {
